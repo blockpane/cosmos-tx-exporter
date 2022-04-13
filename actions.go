@@ -4,14 +4,16 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/tendermint/tendermint/abci/types"
-	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	"log"
 	"sort"
 	"strings"
 	"sync"
 	"time"
+
+	typeTx "github.com/cosmos/cosmos-sdk/types/tx"
+	"github.com/tendermint/tendermint/abci/types"
+	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 func parseTxs(client *rpchttp.HTTP, transactions *Txs, resp *coretypes.ResultTxSearch) {
@@ -39,6 +41,14 @@ func parseTxs(client *rpchttp.HTTP, transactions *Txs, resp *coretypes.ResultTxS
 			}
 			wasDelegate = newEvent.addAttribute(extraInfo, event.Type, event.Attributes)
 			// the first coin_spent on a delegate is the fee, don't count the second which is the delegated amount
+			// first check for no fee which should be skipped completely
+			ok, err := hadFee(tx.Tx)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if !ok && wasDelegate {
+				continue
+			}
 			if wasDelegate && !skipNextSpend {
 				skipNextSpend = true
 			} else if skipNextSpend && event.Type == "coin_spent" {
@@ -241,6 +251,15 @@ func (t TxAction) toCsv() []byte {
 		t.TxHash,
 		t.Index,
 	) + "\n")
+}
+
+func hadFee(tx []byte) (fee bool, err error) {
+	var transaction = typeTx.Tx{}
+	err = transaction.Unmarshal(tx)
+	if err != nil {
+		return
+	}
+	return !transaction.AuthInfo.Fee.Amount.IsZero(), err
 }
 
 func getBlockTime(client *rpchttp.HTTP, height int64) (time.Time, error) {
