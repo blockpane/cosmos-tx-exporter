@@ -9,14 +9,15 @@ import (
 )
 
 func Run() {
-
+	defer f.Close()
 	client, _ := rpchttp.New(endpoint, "/websocket")
 	err := client.Start()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Stop()
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	//ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	ibcMap, err = discoverIbcCurrencies(client)
@@ -25,26 +26,41 @@ func Run() {
 	}
 
 	transactions := newTxs()
-	// TODO: loop correctly!
-	page, perPage := 1, 100
-	resp, err := client.TxSearch(ctx, fmt.Sprintf("coin_received.receiver = '%s'", account), false, &page, &perPage, "desc")
-	if err != nil {
-		log.Fatal(err)
-	}
-	parseTxs(client, transactions, resp)
-	resp, err = client.TxSearch(ctx, fmt.Sprintf("coin_spent.spender = '%s'", account), false, &page, &perPage, "desc")
-	if err != nil {
-		log.Fatal(err)
-	}
-	parseTxs(client, transactions, resp)
 
-	fmt.Println(csvHeader)
+	go func() {
+		for {
+			time.Sleep(10 * time.Second)
+			log.Printf("Processed %d transactions\n", len(transactions.Actions))
+		}
+	}()
+
+	perPage := 100
+	more := true
+	for page := 1; more; page++ {
+		resp, e := client.TxSearch(ctx, fmt.Sprintf("coin_received.receiver = '%s'", account), false, &page, &perPage, "desc")
+		if e != nil {
+			log.Fatal(e)
+		}
+		parseTxs(client, transactions, resp)
+		more = resp.TotalCount > perPage*page
+	}
+	more = true
+	for page := 1; more; page++ {
+		resp, e := client.TxSearch(ctx, fmt.Sprintf("coin_spent.spender = '%s'", account), false, &page, &perPage, "desc")
+		if e != nil {
+			log.Fatal(e)
+		}
+		parseTxs(client, transactions, resp)
+		more = resp.TotalCount > perPage*page
+	}
+
+	log.Println("Collection finished, sorting transactions...")
 	transactions.sort()
 	for i := range transactions.Actions {
-		fmt.Print(string(transactions.Actions[i].toCsv()))
+		_, err = f.Write(transactions.Actions[i].toCsv())
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
+	log.Printf("Done, writing file %s", outFile)
 }
-
-
-
-

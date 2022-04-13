@@ -27,7 +27,6 @@ type currencies struct {
 	Denoms map[string]*currency `yaml:"denoms"`
 }
 
-
 func (c *currencies) lookup(denom string) (precision int, token string, chain string, found bool) {
 	c.Lock()
 	defer c.Unlock()
@@ -66,7 +65,7 @@ type ibcCurrency struct {
 
 func (ibc *ibcCurrency) add(hash string, denom string) error {
 	if hash == "" || denom == "" {
-		return errors.New("hash or denom empty, skipping: "+hash)
+		return errors.New("hash or denom empty, skipping: " + hash)
 	}
 	ibc.Lock()
 	defer ibc.Unlock()
@@ -85,7 +84,10 @@ func (ibc *ibcCurrency) get(hash string) string {
 }
 
 func discoverIbcCurrencies(client *rpchttp.HTTP) (*ibcCurrency, error) {
-	resp, err := client.ABCIQuery(context.Background(), `/cosmos.bank.v1beta1.Query/TotalSupply`, []byte{ 10, 0})
+	log.Println("Standby, mapping all IBC assets")
+	defer log.Println("Finished mapping all IBC assets")
+
+	resp, err := client.ABCIQuery(context.Background(), `/cosmos.bank.v1beta1.Query/TotalSupply`, []byte{10, 0})
 	if err != nil {
 		return nil, err
 	}

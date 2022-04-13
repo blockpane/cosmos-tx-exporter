@@ -24,24 +24,33 @@ func parseTxs(client *rpchttp.HTTP, transactions *Txs, resp *coretypes.ResultTxS
 			log.Fatal("could not determine block time, this is fatal", e)
 		}
 		extraInfo := getEventDescription(tx)
+		var skipNextSpend, wasDelegate bool
 		for j, event := range tx.TxResult.Events {
-			newEvent := &TxAction{
-				Date:        blockTime,
-				TxHash:      hex.EncodeToString(tx.Tx.Hash()),
-				Index:       j,
-				Description: event.Type+extraInfo,
-				Height:      tx.Height,
-			}
 			if event.Type != "coin_spent" && event.Type != "coin_received" {
 				// no value transferred.
 				continue
 			}
-			_ = newEvent.addAttribute(event.Type, event.Attributes)
-			//if newEvent.addAttribute(event.Type, event.Attributes) {
-			//	fmt.Printf("%+v\n", newEvent)
-			//}
+			newEvent := &TxAction{
+				Date:        blockTime,
+				TxHash:      hex.EncodeToString(tx.Tx.Hash()),
+				Index:       j,
+				Description: event.Type + extraInfo,
+				Height:      tx.Height,
+			}
+			wasDelegate = newEvent.addAttribute(extraInfo, event.Type, event.Attributes)
+			// the first coin_spent on a delegate is the fee, don't count the second which is the delegated amount
+			if wasDelegate && !skipNextSpend {
+				skipNextSpend = true
+			} else if skipNextSpend && event.Type == "coin_spent" {
+				continue
+			}
 			if newEvent.hasValue() {
-				if strings.Contains(extraInfo, "Withdraw") {
+				if strings.Contains(extraInfo, "Withdraw") ||
+					strings.Contains(extraInfo, "Delegate") ||
+					strings.Contains(extraInfo, "BeginRedelegate") ||
+					newEvent.Description == "coin_received - Authz Claim" ||
+					newEvent.Description == "coin_spent - Vote" {
+
 					if newEvent.RecievedAmount > 0 {
 						newEvent.Label = "reward"
 					} else if newEvent.SentAmount > 0 {
@@ -56,14 +65,14 @@ func parseTxs(client *rpchttp.HTTP, transactions *Txs, resp *coretypes.ResultTxS
 					droppedTokens, tokenName, isClaim := isAirdrop(tx)
 					if isClaim {
 						transactions.Actions = append(transactions.Actions, &TxAction{
-							Date:        blockTime,
-							TxHash:      hex.EncodeToString(tx.Tx.Hash()),
-							Index:       99,
-							Description: "airdrop claim"+extraInfo,
-							Height:      tx.Height,
-							RecievedAmount: droppedTokens,
+							Date:             blockTime,
+							TxHash:           hex.EncodeToString(tx.Tx.Hash()),
+							Index:            99,
+							Description:      "airdrop claim" + extraInfo,
+							Height:           tx.Height,
+							RecievedAmount:   droppedTokens,
 							ReceivedCurrency: tokenName,
-							Label: "airdrop",
+							Label:            "airdrop",
 						})
 					}
 				}
@@ -105,20 +114,25 @@ func (txs *Txs) sort() {
 	})
 }
 
-func getEventDescription(tx *coretypes.ResultTx) (actions string){
+func getEventDescription(tx *coretypes.ResultTx) (actions string) {
 	actionList := make(map[string]bool)
+	var isAuthz bool
 	for _, event := range tx.TxResult.Events {
 		for _, attribute := range event.Attributes {
-			if string(attribute.Key) == "action" {
+			if string(attribute.Key) == "action" && string(attribute.Value) == "/cosmos.authz.v1beta1.MsgExec" {
+				isAuthz = true
+			} else if string(attribute.Key) == "action" {
 				actionSplit := strings.Split(string(attribute.Value), ".")
 				if len(actionSplit) > 0 {
 					actionList[strings.TrimPrefix(actionSplit[len(actionSplit)-1], "Msg")] = true
 				}
+			} else if isAuthz && string(attribute.Key) == "module" && string(attribute.Value) == "distribution" {
+				actionList["Authz Claim"] = true
 			}
 		}
 	}
 	for k := range actionList {
-		actions += " - "+k
+		actions += " - " + k
 	}
 	return
 }
@@ -139,29 +153,37 @@ type TxAction struct {
 	Height int64 // needed to sort at the end
 }
 
-func (t *TxAction) addAttribute(evtType string, attrs []types.EventAttribute) bool {
+func (t *TxAction) addAttribute(extraInfo string, evtType string, attrs []types.EventAttribute) (skipSent bool) {
 	var tmpAmount string
 	var add bool
 	switch evtType {
 	case "coin_spent":
 		for _, attr := range attrs {
+			if strings.Contains(extraInfo, "Authz Claim") {
+				// this account didn't pay any fees for ReStake: determined by authz vs distribution module.
+				break
+			}
 			if string(attr.Key) == "spender" && string(attr.Value) == account {
 				add = true
 			} else if string(attr.Key) == "amount" {
 				tmpAmount = string(attr.Value)
 			}
+			// on a delegate event, the first spend is the fee, second is the delegation, don't count the delegation as a spend!
+			if add && tmpAmount != "" && strings.Contains(extraInfo, "Delegate") {
+				skipSent = true
+				break
+			}
 		}
-		// amount float64, token string, chain string, err error
 		if add {
 			amt, token, _, e := parseAmount(tmpAmount)
 			if e != nil {
 				log.Println(e)
-				return false
+				return
 			}
 			t.Label = "withdrawal"
 			t.SentAmount = amt
 			t.SentCurrency = token
-			return true
+			return
 		}
 
 	case "coin_received":
@@ -176,17 +198,17 @@ func (t *TxAction) addAttribute(evtType string, attrs []types.EventAttribute) bo
 			amt, token, _, e := parseAmount(tmpAmount)
 			if e != nil {
 				log.Println(e)
-				return false
+				return
 			}
 			t.Label = "deposit"
 			t.RecievedAmount = amt
 			t.ReceivedCurrency = token
-			return true
+			return
 		}
 
 	}
 
-	return false
+	return
 }
 
 func (t *TxAction) hasValue() (ok bool) {
@@ -218,7 +240,7 @@ func (t TxAction) toCsv() []byte {
 		t.Description,
 		t.TxHash,
 		t.Index,
-	)+"\n")
+	) + "\n")
 }
 
 func getBlockTime(client *rpchttp.HTTP, height int64) (time.Time, error) {
