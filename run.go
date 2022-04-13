@@ -30,7 +30,7 @@ func Run() {
 	go func() {
 		for {
 			time.Sleep(10 * time.Second)
-			log.Printf("Processed %d transactions\n", len(transactions.Actions))
+			log.Printf("Processed %d actions\n", len(transactions.Actions))
 		}
 	}()
 

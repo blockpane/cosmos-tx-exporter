@@ -18,7 +18,7 @@ var (
 	ibcMap      = &ibcCurrency{}
 )
 
-const csvHeader = `Date,Sent Amount,Sent Currency,Received Amount,Received Currency,Fee Amount,Fee Currency,Net Worth Amount,Net Worth Currency,Label,Description,TxHash`
+const csvHeader = "Date,Sent Amount,Sent Currency,Received Amount,Received Currency,Fee Amount,Fee Currency,Net Worth Amount,Net Worth Currency,Label,Description,TxHash\n"
 
 //go:embed currencies.yaml
 var denoms []byte
