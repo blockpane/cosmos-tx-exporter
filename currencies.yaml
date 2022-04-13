@@ -1,0 +1,282 @@
+---
+denoms:
+  ubld:
+    token_symbol: BLD
+    precision: 6
+    chain: Agoric
+  urun:
+    token_symbol: RUN
+    precision: 6
+    chain: Agoric
+  uakt:
+    token_symbol: AKT
+    precision: 6
+    chain: Akash
+  uband:
+    token_symbol: BAND
+    precision: 6
+    chain: Band
+  ubcna:
+    token_symbol: BCNA
+    precision: 6
+    chain: Bitcanna
+  ubtsg:
+    token_symbol: BTSG
+    precision: 6
+    chain: Bitsong
+  boot:
+    token_symbol: BOOT
+    precision: 0
+    chain: Bostrom
+  celes:
+    token_symbol: CELES
+    precision: 0
+    chain: Celestia
+  ucrbrus:
+    token_symbol: CRBRUS
+    precision: 6
+    chain: Cerberus
+  ncheq:
+    token_symbol: CHEQ
+    precision: 9
+    chain: Cheqd
+  uhuahua:
+    token_symbol: HUAHUA
+    precision: 6
+    chain: Chihuahua
+  ucoho:
+    token_symbol: COHO
+    precision: 6
+    chain: Cosmic Horizon
+  ucmdx:
+    token_symbol: CMDX
+    precision: 6
+    chain: Comdex
+  uatom:
+    token_symbol: ATOM
+    precision: 6
+    chain: Cosmos
+  basecro:
+    token_symbol: CRO
+    precision: 8
+    chain: Crypto.com
+  udsm:
+    token_symbol: DSM
+    precision: 6
+    chain: Desmos
+  udig:
+    token_symbol: DIG
+    precision: 6
+    chain: Dig
+  udws:
+    token_symbol: DWS
+    precision: 6
+    chain: Deweb
+  ungm:
+    token_symbol: NGM
+    precision: 6
+    chain: Emoney
+  eeur:
+    token_symbol: EEUR
+    precision: 6
+    chain: Emoney
+  aevmos:
+    token_symbol: EVMOS
+    precision: 18
+    chain: Evmos
+  afet:
+    token_symbol: FET
+    precision: 18
+    chain: Fetch AI
+  aphoton:
+    token_symbol: PHOTON
+    precision: 18
+    chain: Genesis L1
+  ugraviton:
+    token_symbol: GRAVITON
+    precision: 6
+    chain: Gravity Bridge
+  inj:
+    token_symbol: INJ
+    precision: 18
+    chain: Injective
+  uiris:
+    token_symbol: IRIS
+    precision: 6
+    chain: Iris Network
+  uixo:
+    token_symbol: IXO
+    precision: 6
+    chain: Ixo
+  ujuno:
+    token_symbol: JUNO
+    precision: 6
+    chain: Juno
+  ukava:
+    token_symbol: KAVA
+    precision: 6
+    chain: Kava
+  uxki:
+    token_symbol: KXI
+    precision: 6
+    chain: Kichain
+  nanolike:
+    token_symbol: LIKE
+    precision: 9
+    chain: Likecoin
+  ulum:
+    token_symbol: LUM
+    precision: 6
+    chain: Lum
+  utick:
+    token_symbol: TICK
+    precision: 6
+    chain: Lum
+  okt:
+    token_symbol: OKT
+    precision: 0
+    chain: Okex
+  uflix:
+    token_symbol: FLIX
+    precision: 6
+    chain: Omniflix
+  uosmo:
+    token_symbol: OSMO
+    precision: 6
+    chain: Osmosis
+  uion:
+    token_symbol: ION
+    precision: 6
+    chain: Osmosis
+  uxprt:
+    token_symbol: XPRT
+    precision: 6
+    chain: Persistence
+  nhash:
+    token_symbol: HASH
+    precision: 9
+    chain: Provenance
+  uregen:
+    token_symbol: REGEN
+    precision: 6
+    chain: Regen
+  uatolo:
+    token_symbol: ATOLO
+    precision: 6
+    chain: Rizon
+  uscrt:
+    token_symbol: SCRT
+    precision: 6
+    chain: Secret
+  udvpn:
+    token_symbol: DVPN
+    precision: 6
+    chain: Sentinel
+  uctk:
+    token_symbol: CTK
+    precision: 6
+    chain: Shentu
+  rowan:
+    token_symbol: ROWAN
+    precision: 18
+    chain: Sifchain
+  ustars:
+    token_symbol: STARS
+    precision: 6
+    chain: Stargaze
+  uiov:
+    token_symbol: IOV
+    precision: 6
+    chain: Starname
+  uluna:
+    token_symbol: LUNA
+    precision: 6
+    chain: Terra
+  uusd:
+    token_symbol: UST
+    precision: 6
+    chain: Terra
+  ukrw:
+    token_symbol: UKT
+    precision: 6
+    chain: Terra
+  "cw20:terra183cvzy6knvva6mpvzcq86uyfxw0nd4925m0d0m":
+    token_symbol: WHALE
+    precision: 6
+    chain: Terra
+  uaud:
+    token_symbol: AUD
+    precision: 6
+    chain: Terra
+  ucad:
+    token_symbol: CAD
+    precision: 6
+    chain: Terra
+  uchf:
+    token_symbol: CHF
+    precision: 6
+    chain: Terra
+  ucny:
+    token_symbol: CNY
+    precision: 6
+    chain: Terra
+  udkk:
+    token_symbol: DKK
+    precision: 6
+    chain: Terra
+  ueur:
+    token_symbol: EUR
+    precision: 6
+    chain: Terra
+  ugbp:
+    token_symbol: GBP
+    precision: 6
+    chain: Terra
+  uhkd:
+    token_symbol: HKD
+    precision: 6
+    chain: Terra
+  uidr:
+    token_symbol: IDR
+    precision: 6
+    chain: Terra
+  uinr:
+    token_symbol: INR
+    precision: 6
+    chain: Terra
+  ujpy:
+    token_symbol: JPY
+    precision: 6
+    chain: Terra
+  umnt:
+    token_symbol: MNT
+    precision: 6
+    chain: Terra
+  uphp:
+    token_symbol: PHP
+    precision: 6
+    chain: Terra
+  usdr:
+    token_symbol: SDR
+    precision: 6
+    chain: Terra
+  usek:
+    token_symbol: SEK
+    precision: 6
+    chain: Terra
+  usgd:
+    token_symbol: SGD
+    precision: 6
+    chain: Terra
+  uthb:
+    token_symbol: THB
+    precision: 6
+    chain: Terra
+  uumee:
+    token_symbol: UMEE
+    precision: 6
+    chain: Umee
+  uvdl:
+    token_symbol: VDL
+    precision: 6
+    chain: Vidulum
